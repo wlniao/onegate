@@ -1,0 +1,9 @@
+﻿*.dg
+*.suo
+*.txt
+*.log
+*.user
+/.vs
+/*/obj
+/*/bin
+/*/Properties
