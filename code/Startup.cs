@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +25,7 @@ public class Startup
             var str = "";
             var req = context.Request;
             var path = req.Path.Value;
-            var host = string.IsNullOrEmpty(Program.RealHost) ? req.Host.Value : Program.RealHost;
+            var host = string.IsNullOrEmpty(Program.Domain) ? req.Host.Value : Program.Domain;
             var port = req.HttpContext.Connection.LocalPort;
             if (strUtil.IsIP(host))
             {
@@ -46,9 +42,9 @@ public class Startup
                         reqStr += req.Method + " " + path + (req.QueryString.HasValue ? req.QueryString.Value : "") + " HTTP/1.1";
                         foreach (var header in context.Request.Headers)
                         {
-                            if (header.Key == "Host" && Program.RealHost.Length > 0 && !strUtil.IsIP(Program.RealHost))
+                            if (header.Key == "Host" && Program.Domain.Length > 0 && !strUtil.IsIP(Program.Domain))
                             {
-                                reqStr += "\r\n" + header.Key + ": " + Program.RealHost;
+                                reqStr += "\r\n" + header.Key + ": " + Program.Domain;
                             }
                             else if (header.Key == "Accept-Encoding" || header.Key == "Origin" || header.Key == "Referer")
                             {
@@ -75,7 +71,7 @@ public class Startup
                         }
 
                         #region 发起调用请求
-                        if (req.IsHttps)
+                        if (Program.IsHttps || req.IsHttps)
                         {
                             #region HTTPS请求
                             hostSocket.Connect(host, port);

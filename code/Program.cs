@@ -10,20 +10,36 @@ using Microsoft.Extensions.Logging;
 
 public class Program
 {
-    private static string realhost = null;
-    public static string RealHost
+    private static string domain = null;
+    private static string ishttps = null;
+    public static string Domain
     {
         get
         {
-            if (realhost == null)
+            if (domain == null)
             {
-                realhost = Wlniao.Config.GetSetting("RealHost");
-                if (realhost == null)
+                domain = Wlniao.Config.GetSetting("DOMAIN");
+                if (domain == null)
                 {
-                    realhost = "";
+                    domain = "";
                 }
             }
-            return realhost;
+            return domain;
+        }
+    }
+    public static Boolean IsHttps
+    {
+        get
+        {
+            if (ishttps == null)
+            {
+                ishttps = Wlniao.Config.GetSetting("HTTPS");
+                if (ishttps == null)
+                {
+                    ishttps = "false";
+                }
+            }
+            return ishttps == "true";
         }
     }
     public static void Main(string[] args)
