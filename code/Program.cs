@@ -7,27 +7,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using Wlniao;
 public class Program
 {
-    private static string domain = null;
     private static string ishttps = null;
-    public static string Domain
-    {
-        get
-        {
-            if (domain == null)
-            {
-                domain = Wlniao.Config.GetSetting("DOMAIN");
-                if (domain == null)
-                {
-                    domain = "";
-                }
-            }
-            return domain;
-        }
-    }
-    public static Boolean IsHttps
+    private static Dictionary<string,string> hosts = new Dictionary<string, string>();
+    public static bool IsHttps
     {
         get
         {
@@ -42,6 +27,36 @@ public class Program
             return ishttps == "true";
         }
     }
+    public static string GetDomain(string host)
+    {
+        if (hosts.ContainsKey(host))
+        {
+            return hosts[host];
+        }
+        else
+        {
+            var key = host.SplitBy(".")[0];
+            var domain = Wlniao.Config.GetSetting("DOMAIN_" + key);
+            if (string.IsNullOrEmpty(domain))
+            {
+                domain = Wlniao.Config.GetSetting("DOMAIN");
+                if (string.IsNullOrEmpty(domain))
+                {
+                    if (strUtil.IsIP(host))
+                    {
+                        domain = "ip";
+                    }
+                    else
+                    {
+                        domain = "unkown";
+                    }
+                }
+            }
+            hosts.TryAdd(host, domain);
+            return domain;
+        }
+    }
+
     public static void Main(string[] args)
     {
         //启动Web服务（用于Web代理的错误信息输出）

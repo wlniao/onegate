@@ -25,10 +25,15 @@ public class Startup
             var str = "";
             var req = context.Request;
             var path = req.Path.Value;
-            var host = string.IsNullOrEmpty(Program.Domain) ? req.Host.Value : Program.Domain;
-            if (strUtil.IsIP(host))
+            var host = Program.GetDomain(req.Host.Value);
+            if (host == "ip")
             {
                 str = "{\"errcode\":502,\"errmsg\":\"请通过域名发起服务请求\"}";
+                context.Response.Headers.TryAdd("Content-Type", "application/json");
+            }
+            else if (host == "unkown")
+            {
+                str = "{\"errcode\":502,\"errmsg\":\"您发起请求的域名未配置\"}";
                 context.Response.Headers.TryAdd("Content-Type", "application/json");
             }
             else
@@ -41,9 +46,9 @@ public class Startup
                         reqStr += req.Method + " " + path + (req.QueryString.HasValue ? req.QueryString.Value : "") + " HTTP/1.1";
                         foreach (var header in context.Request.Headers)
                         {
-                            if (header.Key == "Host" && Program.Domain.Length > 0 && !strUtil.IsIP(Program.Domain))
+                            if (header.Key == "Host")
                             {
-                                reqStr += "\r\n" + header.Key + ": " + Program.Domain;
+                                reqStr += "\r\n" + header.Key + ": " + host;
                             }
                             else if (header.Key == "Accept-Encoding" || header.Key == "Origin" || header.Key == "Referer")
                             {
