@@ -26,7 +26,6 @@ public class Startup
             var req = context.Request;
             var path = req.Path.Value;
             var host = string.IsNullOrEmpty(Program.Domain) ? req.Host.Value : Program.Domain;
-            var port = req.HttpContext.Connection.LocalPort;
             if (strUtil.IsIP(host))
             {
                 str = "{\"errcode\":502,\"errmsg\":\"请通过域名发起服务请求\"}";
@@ -74,7 +73,7 @@ public class Startup
                         if (Program.IsHttps || req.IsHttps)
                         {
                             #region HTTPS请求
-                            hostSocket.Connect(host, port);
+                            hostSocket.Connect(host, 443);
                             using (SslStream ssl = new SslStream(new NetworkStream(hostSocket, true), false, new RemoteCertificateValidationCallback(Program.ValidateServerCertificate), null))
                             {
                                 //ssl.AuthenticateAsClientAsync(host).ContinueWith((_rlt) =>
@@ -177,7 +176,7 @@ public class Startup
                         else
                         {
                             #region HTTP请求
-                            hostSocket.Connect(host, port);
+                            hostSocket.Connect(host, 80);
                             if (hostSocket.Send(reqData, reqData.Length, System.Net.Sockets.SocketFlags.None) > 0)
                             {
                                 var first = true;
