@@ -103,11 +103,12 @@ public class Startup
                                         break;
                                     }
                                     var row = 0;
-                                    var lines = System.Text.UTF8Encoding.Default.GetString(rev, 0, count).Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                                    var text = System.Text.UTF8Encoding.Default.GetString(rev, 0, count);
+                                    var lines = text.Split(new string[] { "\r\n" }, StringSplitOptions.None);
                                     #region Headers处理
                                     if (first && lines[0].StartsWith("HTTP"))
                                     {
-                                        first = false;
+                                        first = false;  //标记第一次输出内容读取完毕
                                         var ts = lines[0].Split(' ');
                                         context.Response.StatusCode = cvt.ToInt(ts[1]);
                                         for (row = 1; row < lines.Length; row++)
@@ -162,14 +163,17 @@ public class Startup
                                                     goto ResponseOutPut;
                                                 }
                                             }
-                                            else
-                                            {
-                                                break;
-                                            }
                                         }
-                                        str += str.Length == 0 ? line : "\r\n" + line;
+                                        if (row == 0 || str.Length == 0)
+                                        {
+                                            str += line;
+                                        }
+                                        else
+                                        {
+                                            str += "\r\n" + line;
+                                        }
                                     }
-                                    if (!chunked || str.Length >= totalLength)
+                                    if (System.Text.UTF8Encoding.Default.GetByteCount(str) >= totalLength)
                                     {
                                         goto ResponseOutPut;
                                     }
@@ -235,6 +239,7 @@ public class Startup
                                         }
                                     }
                                     #endregion
+
                                     #region 取文本内容
                                     for (; row < lines.Length; row++)
                                     {
@@ -255,14 +260,17 @@ public class Startup
                                                     goto ResponseOutPut;
                                                 }
                                             }
-                                            else
-                                            {
-                                                break;
-                                            }
                                         }
-                                        str += str.Length == 0 ? line : "\r\n" + line;
+                                        if (row == 0 || str.Length == 0)
+                                        {
+                                            str += line;
+                                        }
+                                        else
+                                        {
+                                            str += "\r\n" + line;
+                                        }
                                     }
-                                    if (!chunked || str.Length >= totalLength)
+                                    if (System.Text.UTF8Encoding.Default.GetByteCount(str) >= totalLength)
                                     {
                                         goto ResponseOutPut;
                                     }
